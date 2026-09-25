@@ -53,6 +53,21 @@ cluster has accepted the transfer.
 
 Requirements: **Node.js ≥ 20**, network access to a Solana RPC endpoint.
 
+### With Docker (recommended)
+
+```bash
+git clone https://github.com/xiaoka520/tollgate.git
+cd tollgate
+
+docker compose up -d --build
+# → http://localhost:8099
+```
+
+Wallets and invoice state persist in `./data`, which is generated on first boot. The image
+ships a container healthcheck against `/api/health`.
+
+### From source
+
 ```bash
 git clone https://github.com/xiaoka520/tollgate.git
 cd tollgate
@@ -67,6 +82,16 @@ npm start                 # → http://localhost:8099
 Open <http://localhost:8099> and press **“Run the paying agent”**. The self-test walks the whole
 loop against **Solana devnet** with a real on-chain transfer and prints an explorer link for the
 settlement transaction.
+
+> The built-in paying wallet needs a little devnet SOL. If the public faucet is rate limited,
+> `GET /api/demo/funding` returns the address plus ready-made faucet links, and the dashboard shows
+> a top-up prompt rather than failing silently. The repository also ships a
+> `devnet-faucet` GitHub Actions workflow so CI can top the wallet up from a different source
+> address:
+>
+> ```bash
+> gh workflow run devnet-faucet -f address=<PUBKEY> -f lamports=1000000000
+> ```
 
 ### Development
 
