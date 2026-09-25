@@ -289,8 +289,10 @@ $('#runDemo').addEventListener('click', async () => {
       if(s){
         const t = addStep(4, s.name, s.signature ? '' : (s.note || 'waiting for cluster confirmation'), 'ok');
         if(s.signature && s.explorer){
+          let span = t.querySelector('span');
+          if(!span){ span = el('span'); t.appendChild(span); }
           const a = el('a',null,'tx '+short(s.signature,16)); a.href=s.explorer; a.target='_blank';
-          t.querySelector('span').appendChild(a);
+          span.appendChild(a);
         }
       }
       const p = body.steps[4];
