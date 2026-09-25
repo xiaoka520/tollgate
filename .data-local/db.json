@@ -18,8 +18,8 @@
       "priceLamports": 1000000,
       "recipient": "EMzpDkHaNHXCH9nKMPcqPNPv26jGY4S2SUS4sbqJKLft",
       "createdAt": "2026-09-25T10:41:11.177Z",
-      "calls": 1,
-      "revenueLamports": 1000000,
+      "calls": 2,
+      "revenueLamports": 2000000,
       "path": "/g/gw_afa392196120"
     },
     {
@@ -32,6 +32,17 @@
       "calls": 0,
       "revenueLamports": 0,
       "path": "/g/gw_ec04ec3baf6a"
+    },
+    {
+      "id": "gw_b41b558d62b1",
+      "name": "e2e 1790335046324",
+      "upstream": "http://tollgate-local:8099/sandbox",
+      "priceLamports": 1000000,
+      "recipient": "EMzpDkHaNHXCH9nKMPcqPNPv26jGY4S2SUS4sbqJKLft",
+      "createdAt": "2026-09-25T11:17:26.330Z",
+      "calls": 0,
+      "revenueLamports": 0,
+      "path": "/g/gw_b41b558d62b1"
     }
   ],
   "invoices": [
@@ -104,6 +115,34 @@
       "paidAt": "2026-09-25T11:06:31.732Z",
       "createdAt": "2026-09-25T11:06:31.373Z",
       "expiresAt": "2026-09-25T11:21:31.373Z"
+    },
+    {
+      "reference": "3QxUJPsk9krdSHyuJTLm9ExKKnfyzwjnCxbNJvaQP4Tz",
+      "gatewayId": "gw_b41b558d62b1",
+      "method": "GET",
+      "path": "/g/gw_b41b558d62b1/network-report",
+      "priceLamports": 1000000,
+      "recipient": "EMzpDkHaNHXCH9nKMPcqPNPv26jGY4S2SUS4sbqJKLft",
+      "status": "pending",
+      "signature": null,
+      "payer": null,
+      "paidAt": null,
+      "createdAt": "2026-09-25T11:17:26.336Z",
+      "expiresAt": "2026-09-25T11:32:26.336Z"
+    },
+    {
+      "reference": "GUDZBUZWj5QbiCNrTS3BZwhmG3v6VYLnsmK5u4Ef9sF5",
+      "gatewayId": "gw_afa392196120",
+      "method": "GET",
+      "path": "/g/gw_afa392196120/network-report",
+      "priceLamports": 1000000,
+      "recipient": "EMzpDkHaNHXCH9nKMPcqPNPv26jGY4S2SUS4sbqJKLft",
+      "status": "paid",
+      "signature": "27XhznQyvmn8XsZUXkUqWpViX98QLN2JUfj6FzprrTUBfah2tHmVYyNZSmWojDMK3x3tYR5mqAz6A8Yy5HkMtJC9",
+      "payer": "Hmz6YnjVvWt1yHpJ3sec8RGc5L3oqWYLRzfCMrcsBhAx",
+      "paidAt": "2026-09-25T11:17:26.437Z",
+      "createdAt": "2026-09-25T11:17:26.346Z",
+      "expiresAt": "2026-09-25T11:32:26.346Z"
     }
   ]
 }

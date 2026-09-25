@@ -1,0 +1,23 @@
+# Tollgate — self-hosted metered API gateway.
+#
+#   docker compose up -d --build
+#   open http://localhost:8099
+#
+# Wallets and invoice state persist in ./data (generated on first boot).
+services:
+  tollgate:
+    build: .
+    image: tollgate:local
+    container_name: tollgate
+    restart: unless-stopped
+    ports:
+      - "8099:8099"
+    environment:
+      TOLLGATE_NETWORK: devnet
+      TOLLGATE_RPC_URL: https://api.devnet.solana.com
+      TOLLGATE_DATA_DIR: /data
+      # Set this when running behind a reverse proxy or tunnel so the 402
+      # challenge quotes reachable verify URLs.
+      # TOLLGATE_PUBLIC_URL: https://tollgate.example.com
+    volumes:
+      - ./data:/data
