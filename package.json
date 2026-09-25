@@ -1,0 +1,34 @@
+{
+  "name": "tollgate",
+  "version": "1.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Tollgate — turn any HTTP API into an agent-payable API. Per-call metering, settled on Solana.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "agent": "tsx scripts/agent-pay.ts",
+    "test:e2e": "tsx test/e2e.ts"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.99.0",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "bufferutil@4.1.0": true,
+    "utf-8-validate@6.0.6": true,
+    "utf-8-validate@5.0.10": true
+  }
+}

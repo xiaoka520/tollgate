@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tollgate — metered APIs for AI agents, settled on Solana</title>
+<meta name="description" content="Point Tollgate at any HTTP API and it becomes agent-payable: HTTP 402 quotes a Solana invoice, the agent pays, the gateway verifies on chain and proxies the call." />
+<style>
+  :root{
+    --bg:#07080d; --panel:#0e1018; --panel-2:#131722; --line:#212636;
+    --txt:#e8ecf5; --dim:#9aa4bd; --accent:#14f195; --accent-2:#9945ff;
+    --warn:#ffb020; --err:#ff5c5c; --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+  header{position:sticky;top:0;z-index:20;backdrop-filter:blur(12px);
+    background:rgba(7,8,13,.82);border-bottom:1px solid var(--line)}
+  .bar{display:flex;align-items:center;gap:14px;height:60px}
+  .logo{font-weight:700;letter-spacing:-.02em;font-size:19px;display:flex;align-items:center;gap:9px}
+  .dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2))}
+  .badge{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--dim);
+    border:1px solid var(--line);border-radius:999px;padding:4px 11px;display:flex;align-items:center;gap:7px}
+  .pulse{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:p 1.8s infinite}
+  @keyframes p{0%,100%{opacity:1}50%{opacity:.25}}
+  h1{font-size:44px;line-height:1.1;letter-spacing:-.03em;margin:56px 0 14px;font-weight:750}
+  h1 .g{background:linear-gradient(100deg,var(--accent),#6ee7ff 45%,var(--accent-2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{font-size:18px;color:var(--dim);max-width:760px}
+  .cta{display:flex;gap:12px;flex-wrap:wrap;margin:26px 0 8px}
+  button,.btn{font:inherit;font-weight:600;border-radius:10px;padding:11px 18px;cursor:pointer;
+    border:1px solid var(--line);background:var(--panel-2);color:var(--txt);transition:.15s}
+  button:hover,.btn:hover{border-color:#333c55;text-decoration:none}
+  button:disabled{opacity:.55;cursor:progress}
+  .primary{background:linear-gradient(100deg,var(--accent),#3ddc97);color:#04170f;border-color:transparent}
+  .primary:hover{filter:brightness(1.07)}
+  section{margin:52px 0}
+  h2{font-size:23px;letter-spacing:-.02em;margin:0 0 6px;font-weight:700}
+  .sub{color:var(--dim);font-size:14px;margin:0 0 18px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .card h3{margin:0 0 6px;font-size:15px}
+  .card p{margin:0;color:var(--dim);font-size:13.5px}
+  .num{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.08em}
+  pre{background:#0a0c13;border:1px solid var(--line);border-radius:12px;padding:15px;overflow:auto;
+    font-family:var(--mono);font-size:12.5px;color:#c9d3e8;margin:14px 0}
+  code{font-family:var(--mono);font-size:12.5px;background:#151a26;border:1px solid var(--line);
+    border-radius:6px;padding:1.5px 6px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{ text-align:left;color:var(--dim);font-weight:600;font-size:11.5px;text-transform:uppercase;
+    letter-spacing:.06em;padding:8px 10px;border-bottom:1px solid var(--line)}
+  td{padding:9px 10px;border-bottom:1px solid #171b26;font-family:var(--mono);font-size:12px}
+  td.name{font-family:inherit;font-size:13px}
+  .status{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--line)}
+  .s-paid{color:var(--accent);border-color:#1d5c42;background:#0b1f18}
+  .s-pending{color:var(--warn);border-color:#5c4a1d;background:#1f1a0b}
+  .s-expired{color:var(--err);border-color:#5c2626;background:#1f0d0d}
+  #log{font-family:var(--mono);font-size:12.5px;background:#0a0c13;border:1px solid var(--line);
+    border-radius:12px;padding:6px 0;min-height:120px;max-height:520px;overflow:auto}
+  .step{padding:11px 15px;border-bottom:1px solid #141824;display:flex;gap:11px;align-items:flex-start}
+  .step:last-child{border-bottom:0}
+  .step .n{flex:0 0 22px;height:22px;border-radius:50%;border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--dim)}
+  .step.ok .n{color:var(--accent);border-color:#1d5c42}
+  .step.bad .n{color:var(--err);border-color:#5c2626}
+  .step .t{flex:1;min-width:0}
+  .step .t b{display:block;font-weight:600;color:var(--txt);font-family:system-ui,sans-serif;font-size:13px}
+  .step .t span{color:var(--dim);word-break:break-all}
+  .metrics{display:flex;gap:26px;flex-wrap:wrap;margin:16px 0 4px}
+  .metric b{display:block;font-size:22px;font-family:var(--mono);color:var(--txt)}
+  .metric span{font-size:11.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+  .field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:170px}
+  label{font-size:11.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+  input,select{font:inherit;font-size:14px;padding:10px 12px;border-radius:9px;border:1px solid var(--line);
+    background:#0b0e15;color:var(--txt);width:100%}
+  input:focus,select:focus{outline:none;border-color:#3a4560}
+  .muted{color:var(--dim);font-size:12.5px}
+  footer{border-top:1px solid var(--line);margin-top:70px;padding:26px 0 46px;color:var(--dim);font-size:13px}
+  .tag{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-radius:6px;padding:2px 7px;color:var(--dim)}
+  .flow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:12px}
+  .flow span{border:1px solid var(--line);border-radius:8px;padding:6px 11px;background:var(--panel)}
+  .flow i{color:var(--dim);font-style:normal}
+</style>
+</head>
+<body>
+<header><div class="wrap bar">
+  <div class="logo"><span class="dot"></span>Tollgate</div>
+  <div class="badge"><span class="pulse" id="netDot"></span><span id="netLabel">connecting…</span></div>
+</div></header>
+
+<div class="wrap">
+
+  <h1>Turn any API into an<br/><span class="g">agent-payable API</span>.</h1>
+  <p class="lede">
+    Tollgate is a metered reverse proxy. Point it at an HTTP API you already run and every call
+    becomes payable on Solana: the gateway answers <code>402 Payment Required</code> with a quoted
+    invoice, the caller settles it on chain, Tollgate verifies the transfer and proxies the request
+    through. No accounts, no API keys, no subscriptions — payment <em>is</em> authentication.
+  </p>
+  <div class="cta">
+    <button class="primary" id="runDemo">▶ Run the paying agent (live on devnet)</button>
+    <a class="btn" href="/sandbox/network-report" target="_blank" rel="noreferrer">See the free sandbox API</a>
+    <a class="btn" id="ghLink" href="https://github.com/xiaoka520/tollgate" target="_blank" rel="noreferrer">Source on GitHub</a>
+  </div>
+  <p class="muted">The self-test uses a faucet-funded devnet wallet and a real on-chain transfer — nothing is simulated.</p>
+
+  <section>
+    <h2>Live self-test</h2>
+    <p class="sub">Five real steps: challenge → fund → settle on Solana → verify → proxy.</p>
+    <div id="log"><div class="step"><div class="n">·</div><div class="t"><b>Idle</b><span>Press “Run the paying agent” to execute the full loop against Solana devnet.</span></div></div></div>
+  </section>
+
+  <section>
+    <h2>How it works</h2>
+    <div class="flow">
+      <span>GET /g/:id/your-endpoint</span><i>→</i>
+      <span>402 + invoice</span><i>→</i>
+      <span>agent pays on Solana</span><i>→</i>
+      <span>retry with reference</span><i>→</i>
+      <span>200 + payload</span>
+    </div>
+    <div class="grid" style="margin-top:18px">
+      <div class="card"><div class="num">01</div><h3>Unique reference per call</h3>
+        <p>Every unpaid request mints a fresh Solana address used as a Solana&nbsp;Pay style reference, so settlements are matched without the caller ever registering.</p></div>
+      <div class="card"><div class="num">02</div><h3>Verification, not trust</h3>
+        <p>Tollgate reads the signatures that touched the reference and checks the recipient's lamport balance actually grew by the quoted price.</p></div>
+      <div class="card"><div class="num">03</div><h3>On-chain memo receipts</h3>
+        <p>Each settled call leaves a <code>tollgate:&lt;gateway&gt;</code> memo, so metering is self-describing and auditable from any explorer.</p></div>
+      <div class="card"><div class="num">04</div><h3>Zero code changes upstream</h3>
+        <p>Your existing service keeps speaking plain HTTP. Tollgate handles the paywall, metering and receipt headers.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Meter one of your APIs</h2>
+    <p class="sub">Create a gateway, then call it through <code>/g/&lt;id&gt;/…</code>. Try it against the built-in sandbox below.</p>
+    <div class="card">
+      <div class="row">
+        <div class="field"><label for="gname">Gateway name</label><input id="gname" value="My metered API" /></div>
+        <div class="field"><label for="gup">Upstream base URL</label><input id="gup" value="" placeholder="/sandbox or https://api.example.com" /></div>
+        <div class="field" style="max-width:150px"><label for="gprice">Price (SOL)</label><input id="gprice" value="0.001" /></div>
+        <button class="primary" id="createGw">Create gateway</button>
+      </div>
+      <pre id="gwResult" style="display:none"></pre>
+    </div>
+  </section>
+
+  <section>
+    <h2>Gateways</h2>
+    <p class="sub">Every gateway registered on this deployment, with lifetime metered revenue.</p>
+    <div class="card" style="padding:6px 10px"><table>
+      <thead><tr><th>Gateway</th><th>Call URL</th><th>Price</th><th>Calls</th><th>Revenue</th></tr></thead>
+      <tbody id="gwTable"><tr><td colspan="5" class="muted">loading…</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>Metered calls</h2>
+    <p class="sub">Invoices issued by this gateway. Paid rows link straight to the settlement transaction.</p>
+    <div class="metrics" id="metrics"></div>
+    <div class="card" style="padding:6px 10px"><table>
+      <thead><tr><th>When</th><th>Status</th><th>Price</th><th>Reference</th><th>Settlement</th></tr></thead>
+      <tbody id="invTable"><tr><td colspan="5" class="muted">loading…</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>Sandbox upstream</h2>
+    <p class="sub">A real API shipped with Tollgate, serving live Solana devnet metrics. Free at <code>/sandbox/*</code>; metered once you put a gateway in front of it.</p>
+    <div class="grid">
+      <div class="card"><h3><code>GET /sandbox/network-report</code></h3><p>Slot, block height, epoch progress and rolling TPS straight from the cluster.</p></div>
+      <div class="card"><h3><code>GET /sandbox/priority-fees</code></h3><p>Median and peak prioritization fees from recent blocks.</p></div>
+      <div class="card"><h3><code>POST /sandbox/echo</code></h3><p>Echoes the JSON body back — handy for testing metered write endpoints.</p></div>
+    </div>
+    <pre id="agentSnippet">curl -s http://127.0.0.1:8099/g/&lt;gatewayId&gt;/network-report
+# → 402 with an invoice
+npx tsx scripts/agent-pay.ts "http://127.0.0.1:8099/g/&lt;gatewayId&gt;/network-report"
+# → settles on devnet, retries, prints the paid payload</pre>
+  </section>
+
+  <footer>
+    <div>Tollgate · per-call payments for machine consumers · built on Solana <span id="footNet"></span></div>
+    <div style="margin-top:8px">Merchant wallet <a id="merchantLink" href="#" target="_blank" rel="noreferrer"><span id="merchantAddr">…</span></a></div>
+  </footer>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+let CONFIG = null;
+
+function el(tag, cls, text){ const e=document.createElement(tag); if(cls)e.className=cls; if(text!=null)e.textContent=text; return e; }
+function short(s,n){ return s && s.length>n ? s.slice(0,n)+'…' : s; }
+
+async function j(url, opts){
+  const r = await fetch(url, opts);
+  let body = null; try { body = await r.json(); } catch {}
+  return { status:r.status, ok:r.ok, body };
+}
+
+function addStep(n, title, detail, kind){
+  const row = el('div','step'+(kind?' '+kind:''));
+  row.appendChild(el('div','n',String(n)));
+  const t = el('div','t');
+  t.appendChild(el('b',null,title));
+  if(detail) t.appendChild(el('span',null,detail));
+  row.appendChild(t);
+  $('#log').appendChild(row);
+  $('#log').scrollTop = $('#log').scrollHeight;
+  return t;
+}
+
+async function loadConfig(){
+  const { body } = await j('/api/config');
+  CONFIG = body;
+  $('#netLabel').textContent = (body.network||'').toUpperCase() + ' · ' + (body.baseUrl||'').replace(/^https?:\/\//,'');
+  $('#merchantAddr').textContent = short(body.merchant, 12);
+  $('#merchantLink').href = body.merchantExplorer;
+  $('#footNet').textContent = '· ' + body.network;
+  const up = $('#gup'); if(!up.value) up.value = '/sandbox';
+}
+
+async function refresh(){
+  const { body } = await j('/api/stats');
+  if(!body) return;
+  const s = body.stats || {};
+  $('#metrics').innerHTML = '';
+  const mk = (v,l)=>{ const d=el('div','metric'); d.appendChild(el('b',null,String(v))); d.appendChild(el('span',null,l)); $('#metrics').appendChild(d); };
+  mk(s.gateways||0,'gateways'); mk(s.paidCalls||0,'paid calls'); mk(s.pending||0,'awaiting payment');
+  mk(((s.revenueLamports||0)/1e9).toFixed(4)+' SOL','metered revenue');
+
+  const gws = body.gateways || [];
+  $('#gwTable').innerHTML = gws.length ? '' : '<tr><td colspan="5" class="muted">No gateways yet — create one above.</td></tr>';
+  for(const g of gws){
+    const tr = el('tr');
+    tr.appendChild(el('td','name',g.name));
+    const u = el('td'); const a = el('a',null,'/g/'+g.id); a.href='/g/'+g.id+'/network-report'; a.target='_blank'; u.appendChild(a); tr.appendChild(u);
+    tr.appendChild(el('td',null,(g.priceLamports/1e9).toFixed(6)+' SOL'));
+    tr.appendChild(el('td',null,String(g.calls)));
+    tr.appendChild(el('td',null,(g.revenueLamports/1e9).toFixed(6)+' SOL'));
+    $('#gwTable').appendChild(tr);
+  }
+
+  const { body: inv } = await j('/api/invoices?limit=25');
+  const list = (inv && inv.invoices) || [];
+  $('#invTable').innerHTML = list.length ? '' : '<tr><td colspan="5" class="muted">No metered calls yet.</td></tr>';
+  for(const i of list){
+    const tr = el('tr');
+    tr.appendChild(el('td',null,new Date(i.createdAt).toLocaleTimeString()));
+    const st = el('td'); st.appendChild(el('span','status s-'+i.status,i.status)); tr.appendChild(st);
+    tr.appendChild(el('td',null,(i.priceLamports/1e9).toFixed(6)));
+    tr.appendChild(el('td',null,short(i.reference,10)));
+    const sig = el('td');
+    if(i.signature){ const a=el('a',null,short(i.signature,10)); a.href = (CONFIG && CONFIG.network==='mainnet-beta') ? 'https://explorer.solana.com/tx/'+i.signature : 'https://explorer.solana.com/tx/'+i.signature+'?cluster='+CONFIG.network; a.target='_blank'; sig.appendChild(a); }
+    else sig.textContent = '—';
+    tr.appendChild(sig);
+    $('#invTable').appendChild(tr);
+  }
+}
+
+$('#runDemo').addEventListener('click', async () => {
+  const btn = $('#runDemo'); btn.disabled = true;
+  $('#log').innerHTML = '';
+  let n = 1;
+  addStep(n++, 'Calling the metered endpoint without payment', 'GET /g/…/network-report');
+  try{
+    const { body } = await j('/api/demo/run', { method:'POST', headers:{'content-type':'application/json'}, body:'{}' });
+    $('#log').innerHTML = '';
+    if(!body || !body.steps){ addStep(1,'Self-test failed','No response from the gateway.', 'bad'); }
+    else if(body.error === 'paying_agent_wallet_unfunded'){
+      addStep(1, body.steps[0]?.name || 'Self-test', body.steps[0]?.url || '', 'ok');
+      addStep(2, 'Gateway quoted an invoice (HTTP 402)', body.steps[1]?.challenge ? ('quote '+body.steps[1].challenge.priceSol+' SOL') : '', 'ok');
+      const t = addStep(3, 'Built-in paying wallet needs a top-up', body.message, 'bad');
+      const a = el('a',null,'Fund '+body.payingAgent.address+' on faucet.solana.com'); a.href=body.payingAgent.faucet; a.target='_blank'; a.style.display='block'; a.style.marginTop='6px'; t.appendChild(a);
+      const e2 = el('a',null,'view the wallet on explorer'); e2.href=body.payingAgent.explorer; e2.target='_blank'; e2.style.display='block'; t.appendChild(e2);
+    }
+    else {
+      const first = body.steps[0];
+      addStep(1, first.name, first.url, 'ok');
+      const c = body.steps[1];
+      if(c){ const ch=c.challenge||{}; addStep(2, c.name+' → HTTP '+c.status, 'quote '+ch.priceSol+' SOL · ref '+short(ch.reference,12), 'ok'); }
+      const f = body.steps[2];
+      if(f){ addStep(3, f.name, 'payer '+short(f.payer,10)+' · balance '+f.balanceSol+' SOL · via '+f.source, 'ok'); }
+      const s = body.steps[3];
+      if(s){ const t=addStep(4, s.name, '', 'ok'); const a=el('a',null,'tx '+short(s.signature,16)); a.href=s.explorer; a.target='_blank'; t.querySelector('span').appendChild(a); }
+      const p = body.steps[4];
+      if(p){ const t=addStep(5, p.name+' → HTTP '+p.status, '', p.status===200?'ok':'bad');
+        const pre=el('pre',null,JSON.stringify(p.payload,null,2)); t.appendChild(pre);
+        const a=el('a',null,'settlement tx on explorer'); a.href=p.explorer; a.target='_blank'; a.style.display='block'; a.style.marginTop='6px'; t.appendChild(a); }
+      addStep(6, body.ok ? 'Metered call delivered ✓' : 'Self-test reported a problem',
+              'completed in '+(body.elapsedMs||0)+' ms'+(body.error?(' · '+body.error):''), body.ok?'ok':'bad');
+    }
+  }catch(e){ addStep(1,'Self-test threw', String(e), 'bad'); }
+  btn.disabled = false;
+  setTimeout(refresh, 600);
+});
+
+$('#createGw').addEventListener('click', async () => {
+  const name = $('#gname').value.trim();
+  let upstream = $('#gup').value.trim();
+  if(upstream.startsWith('/')) upstream = (CONFIG?.baseUrl || location.origin) + upstream;
+  const priceSol = Number($('#gprice').value);
+  const out = $('#gwResult'); out.style.display='block';
+  out.textContent = 'creating…';
+  const { status, body } = await j('/api/gateways', {
+    method:'POST', headers:{'content-type':'application/json'},
+    body: JSON.stringify({ name, upstream, priceSol })
+  });
+  if(status !== 201){ out.textContent = 'Error '+status+': '+JSON.stringify(body); return; }
+  const call = body.callUrl + '/network-report';
+  out.textContent = [
+    'Gateway '+body.gateway.id+' live.',
+    '',
+    '  curl -i "'+call+'"',
+    '    → 402 Payment Required (invoice quoted)',
+    '',
+    '  npx tsx scripts/agent-pay.ts "'+call+'"',
+    '    → settles on Solana, retries, prints the payload',
+    '',
+    '  price: '+(body.gateway.priceLamports/1e9)+' SOL per call → '+body.gateway.recipient
+  ].join('\n');
+  refresh();
+});
+
+loadConfig().then(refresh);
+setInterval(refresh, 12000);
+</script>
+</body>
+</html>
