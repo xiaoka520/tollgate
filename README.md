@@ -204,6 +204,7 @@ non-signer, add the memo, then replay the request with the reference in `x-tollg
 | `GET` | `/api/stats` | Aggregate metering stats |
 | `GET` | `/api/demo/funding` | Built-in paying wallet balance + faucet links |
 | `POST` | `/api/demo/run` | Full self-test: challenge → settle → verify → proxy |
+| `GET` | `/api/receipts/:signature` | Re-read a settlement straight from the cluster — slot, fee, memo, lamport deltas |
 | `*` | `/g/:gatewayId/*` | **The metered proxy** — 402 until settled |
 | `GET` | `/sandbox/network-report` | Bundled upstream API: live devnet slot / epoch / TPS |
 | `GET` | `/sandbox/priority-fees` | Bundled upstream API: recent prioritization fees |
