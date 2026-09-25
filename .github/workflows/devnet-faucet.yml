@@ -1,0 +1,46 @@
+name: devnet-faucet
+
+# Top up the Tollgate devnet demo wallet from CI.
+#
+# The public Solana faucet is rate limited per source IP, which makes local
+# development flaky. Running the request from a CI runner gives it a different
+# source address, so this workflow doubles as the project's "fund the demo"
+# button. Dispatch it manually and pass the payer address.
+#
+#   gh workflow run devnet-faucet -f address=<PUBKEY> -f lamports=1000000000
+
+on:
+  workflow_dispatch:
+    inputs:
+      address:
+        description: Solana devnet address to fund
+        required: true
+        type: string
+      lamports:
+        description: Lamports to request (1 SOL = 1000000000)
+        required: false
+        default: "1000000000"
+        type: string
+
+jobs:
+  airdrop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request devnet SOL
+        env:
+          ADDRESS: ${{ inputs.address }}
+          LAMPORTS: ${{ inputs.lamports }}
+        run: |
+          echo "Requesting $LAMPORTS lamports for $ADDRESS"
+          curl -sS -X POST https://api.devnet.solana.com \
+            -H "Content-Type: application/json" \
+            -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"requestAirdrop\",\"params\":[\"$ADDRESS\",$LAMPORTS]}"
+
+      - name: Confirm balance
+        env:
+          ADDRESS: ${{ inputs.address }}
+        run: |
+          sleep 5
+          curl -sS -X POST https://api.devnet.solana.com \
+            -H "Content-Type: application/json" \
+            -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getBalance\",\"params\":[\"$ADDRESS\"]}"

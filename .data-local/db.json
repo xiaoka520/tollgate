@@ -1,0 +1,109 @@
+{
+  "gateways": [
+    {
+      "id": "gw_ba0d674d2e25",
+      "name": "e2e 1790332871149",
+      "upstream": "http://tollgate-app:8099/sandbox",
+      "priceLamports": 1000000,
+      "recipient": "EMzpDkHaNHXCH9nKMPcqPNPv26jGY4S2SUS4sbqJKLft",
+      "createdAt": "2026-09-25T10:41:11.164Z",
+      "calls": 0,
+      "revenueLamports": 0,
+      "path": "/g/gw_ba0d674d2e25"
+    },
+    {
+      "id": "gw_afa392196120",
+      "name": "Built-in Sandbox",
+      "upstream": "http://127.0.0.1:8099/sandbox",
+      "priceLamports": 1000000,
+      "recipient": "EMzpDkHaNHXCH9nKMPcqPNPv26jGY4S2SUS4sbqJKLft",
+      "createdAt": "2026-09-25T10:41:11.177Z",
+      "calls": 1,
+      "revenueLamports": 1000000,
+      "path": "/g/gw_afa392196120"
+    },
+    {
+      "id": "gw_ec04ec3baf6a",
+      "name": "e2e 1790334391276",
+      "upstream": "http://127.0.0.1:8099/sandbox",
+      "priceLamports": 1000000,
+      "recipient": "EMzpDkHaNHXCH9nKMPcqPNPv26jGY4S2SUS4sbqJKLft",
+      "createdAt": "2026-09-25T11:06:31.293Z",
+      "calls": 0,
+      "revenueLamports": 0,
+      "path": "/g/gw_ec04ec3baf6a"
+    }
+  ],
+  "invoices": [
+    {
+      "reference": "Ar4TqLpFfAZNVbEQ3X39KwrtxXFzvPgNSvzWseHqUfBR",
+      "gatewayId": "gw_ba0d674d2e25",
+      "method": "GET",
+      "path": "/g/gw_ba0d674d2e25/network-report",
+      "priceLamports": 1000000,
+      "recipient": "EMzpDkHaNHXCH9nKMPcqPNPv26jGY4S2SUS4sbqJKLft",
+      "status": "expired",
+      "signature": null,
+      "payer": null,
+      "paidAt": null,
+      "createdAt": "2026-09-25T10:41:11.170Z",
+      "expiresAt": "2026-09-25T10:56:11.170Z"
+    },
+    {
+      "reference": "Hc3G47VMpJHQd5ZSrmskxyVrSEmuD58Gcsneufvd8xPR",
+      "gatewayId": "gw_afa392196120",
+      "method": "GET",
+      "path": "/g/gw_afa392196120/network-report",
+      "priceLamports": 1000000,
+      "recipient": "EMzpDkHaNHXCH9nKMPcqPNPv26jGY4S2SUS4sbqJKLft",
+      "status": "expired",
+      "signature": null,
+      "payer": null,
+      "paidAt": null,
+      "createdAt": "2026-09-25T10:41:11.215Z",
+      "expiresAt": "2026-09-25T10:56:11.215Z"
+    },
+    {
+      "reference": "PSRLfU5k5xkzSF5VwR5y8CNZ9E5NA3SBf7CsoWk6VRx",
+      "gatewayId": "gw_afa392196120",
+      "method": "GET",
+      "path": "/g/gw_afa392196120/network-report",
+      "priceLamports": 1000000,
+      "recipient": "EMzpDkHaNHXCH9nKMPcqPNPv26jGY4S2SUS4sbqJKLft",
+      "status": "expired",
+      "signature": null,
+      "payer": null,
+      "paidAt": null,
+      "createdAt": "2026-09-25T10:41:24.275Z",
+      "expiresAt": "2026-09-25T10:56:24.275Z"
+    },
+    {
+      "reference": "F9Le631rKm4hQu6vaNc46Upb1uLizoUzZvxrFxzBs4j",
+      "gatewayId": "gw_ec04ec3baf6a",
+      "method": "GET",
+      "path": "/g/gw_ec04ec3baf6a/network-report",
+      "priceLamports": 1000000,
+      "recipient": "EMzpDkHaNHXCH9nKMPcqPNPv26jGY4S2SUS4sbqJKLft",
+      "status": "pending",
+      "signature": null,
+      "payer": null,
+      "paidAt": null,
+      "createdAt": "2026-09-25T11:06:31.302Z",
+      "expiresAt": "2026-09-25T11:21:31.302Z"
+    },
+    {
+      "reference": "GaQx2d1Svmyvxe8pkhfuKXTR5qfQZRdBpVTd7rGNcxXx",
+      "gatewayId": "gw_afa392196120",
+      "method": "GET",
+      "path": "/g/gw_afa392196120/network-report",
+      "priceLamports": 1000000,
+      "recipient": "EMzpDkHaNHXCH9nKMPcqPNPv26jGY4S2SUS4sbqJKLft",
+      "status": "paid",
+      "signature": "5s9txLyB1ygPTUt3Woabv26ZejooC7uU96MtJtpqF6qsq3jEVeRNPiu55Y8qKmP6u31CoiWAVGJUQgyEfU93afjV",
+      "payer": "Hmz6YnjVvWt1yHpJ3sec8RGc5L3oqWYLRzfCMrcsBhAx",
+      "paidAt": "2026-09-25T11:06:31.732Z",
+      "createdAt": "2026-09-25T11:06:31.373Z",
+      "expiresAt": "2026-09-25T11:21:31.373Z"
+    }
+  ]
+}
