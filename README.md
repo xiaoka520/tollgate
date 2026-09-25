@@ -1,5 +1,7 @@
 # Tollgate
 
+> **🇩🇪 Kurzfassung auf Deutsch:** [README.de.md](README.de.md) — Problem, Lösung, Live-Demo, devnet-Nachweis und Betrieb in Deutsch.
+
 **Turn any HTTP API into an agent-payable API — per-call metering, settled on Solana.**
 
 ▶ **[Watch the 2:40 demo](https://github.com/xiaoka520/tollgate/releases/download/demo-v1/tollgate-demo.mp4)** — recorded against Solana devnet on the live deployment: a real 402 challenge, a real transfer, and the settlement read back out of the cluster. Nothing is mocked.
