@@ -2,6 +2,8 @@
 
 **Turn any HTTP API into an agent-payable API — per-call metering, settled on Solana.**
 
+▶ **[Watch the 2:40 demo](https://github.com/xiaoka520/tollgate/releases/download/demo-v1/tollgate-demo.mp4)** — recorded against Solana devnet on the live deployment: a real 402 challenge, a real transfer, and the settlement read back out of the cluster. Nothing is mocked.
+
 AI agents can now write code, but they still cannot pay for the APIs they call. Every metered
 service on the internet is gated behind a human-shaped onboarding flow: sign up, verify an email,
 get an API key, attach a credit card. Tollgate deletes all of it. Point Tollgate at an API you
