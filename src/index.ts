@@ -266,33 +266,61 @@ app.post("/api/demo/run", async (req, res) => {
       return;
     }
 
-    const signature = await payInvoice({
-      payer: demoPayerKeypair,
-      recipient: challenge.recipient,
-      amountLamports: challenge.priceLamports,
-      reference: challenge.reference,
-      memo: challenge.memo,
-    });
+    let signature: string | null = null;
+    let settleNote: string | null = null;
+    try {
+      signature = await payInvoice({
+        payer: demoPayerKeypair,
+        recipient: challenge.recipient,
+        amountLamports: challenge.priceLamports,
+        reference: challenge.reference,
+        memo: challenge.memo,
+      });
+    } catch (error) {
+      // The transfer may still have landed — the gateway verifies on chain by itself, so
+      // report the client-side uncertainty and let the replay below decide the outcome.
+      settleNote = (error as Error).message;
+    }
     steps.push({
       step: 4,
-      name: "Agent settles the invoice on Solana",
+      name: signature
+        ? "Agent settles the invoice on Solana"
+        : "Agent submitted the payment — awaiting cluster confirmation",
       signature,
-      explorer: explorerTx(signature),
+      explorer: signature ? explorerTx(signature) : null,
+      note: settleNote,
     });
 
-    const paid = await fetch(callUrl, { headers: { [PAYMENT_HEADER]: challenge.reference } });
-    const payload = await paid.json();
+    // Replay until the gateway's own on-chain verification unlocks the call. This is
+    // deliberately independent of the client-side confirmation above: a settlement that
+    // confirmed slowly still has to pay off.
+    let payload: unknown = null;
+    let verifiedSignature: string | null = null;
+    let paidStatus = 402;
+    for (let attempt = 1; attempt <= 12; attempt += 1) {
+      const response = await fetch(callUrl, {
+        headers: { [PAYMENT_HEADER]: challenge.reference },
+      });
+      paidStatus = response.status;
+      if (response.status === 200) {
+        verifiedSignature = response.headers.get("x-tollgate-signature");
+        payload = await response.json();
+        break;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+    }
+
     steps.push({
       step: 5,
       name: "Replay with the payment reference — gateway verifies on chain and proxies",
-      status: paid.status,
-      verifiedSignature: paid.headers.get("x-tollgate-signature"),
-      explorer: paid.headers.get("x-tollgate-explorer"),
+      status: paidStatus,
+      verifiedSignature,
+      explorer: verifiedSignature ? explorerTx(verifiedSignature) : null,
       payload,
     });
 
     res.json({
-      ok: paid.status === 200,
+      ok: paidStatus === 200,
       elapsedMs: Date.now() - started,
       gatewayId: gateway.id,
       steps,

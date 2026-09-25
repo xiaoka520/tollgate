@@ -226,7 +226,40 @@ export async function ensureFunded(
   };
 }
 
-/** Sign and send a prepared payment transaction. Used by the built-in self-test. */
+/**
+ * Wait for a signature to reach at least `confirmed`, by polling status.
+ *
+ * `sendAndConfirmTransaction` gives up the moment its own websocket/timeout budget runs out —
+ * on a congested devnet that happens *after* the transfer has already been accepted, which
+ * makes a perfectly good settlement look like a failure. Polling the status endpoint is
+ * resilient to that and also finds transactions that landed from an earlier attempt.
+ */
+async function confirmSignature(signature: string, timeoutMs: number): Promise<boolean> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    try {
+      const { value } = await connection.getSignatureStatuses([signature], {
+        searchTransactionHistory: true,
+      });
+      const status = value[0];
+      if (status?.err) return false;
+      if (status?.confirmationStatus === "confirmed" || status?.confirmationStatus === "finalized") {
+        return true;
+      }
+    } catch {
+      /* transient RPC hiccup — keep polling */
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+  }
+  return false;
+}
+
+/**
+ * Sign and send the metered payment, retrying with a fresh blockhash.
+ *
+ * Used by the built-in self-test. Returns the first signature that actually confirmed, so the
+ * receipt the caller sees always points at a transaction the cluster accepted.
+ */
 export async function payInvoice(params: {
   payer: Keypair;
   recipient: string;
@@ -234,17 +267,37 @@ export async function payInvoice(params: {
   reference: string;
   memo?: string;
 }): Promise<string> {
-  const tx = buildPaymentTransaction({
-    payer: params.payer.publicKey,
-    recipient: new PublicKey(params.recipient),
-    amountLamports: params.amountLamports,
-    reference: new PublicKey(params.reference),
-    memo: params.memo,
-  });
-  const latest = await connection.getLatestBlockhash();
-  tx.recentBlockhash = latest.blockhash;
-  tx.feePayer = params.payer.publicKey;
-  return sendAndConfirmTransaction(connection, tx, [params.payer], {
-    commitment: "confirmed",
-  });
+  const recipient = new PublicKey(params.recipient);
+  const reference = new PublicKey(params.reference);
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    const tx = buildPaymentTransaction({
+      payer: params.payer.publicKey,
+      recipient,
+      amountLamports: params.amountLamports,
+      reference,
+      memo: params.memo,
+    });
+    const { blockhash } = await connection.getLatestBlockhash("confirmed");
+    tx.recentBlockhash = blockhash;
+    tx.feePayer = params.payer.publicKey;
+    tx.sign(params.payer);
+
+    let signature: string;
+    try {
+      signature = await connection.sendRawTransaction(tx.serialize(), {
+        skipPreflight: true,
+        maxRetries: 5,
+      });
+    } catch (error) {
+      lastError = error as Error;
+      continue;
+    }
+
+    if (await confirmSignature(signature, 45_000)) return signature;
+    lastError = new Error(`transaction ${signature} was not confirmed within 45s`);
+  }
+
+  throw lastError ?? new Error("payment could not be settled");
 }

@@ -286,11 +286,17 @@ $('#runDemo').addEventListener('click', async () => {
       const f = body.steps[2];
       if(f){ addStep(3, f.name, 'payer '+short(f.payer,10)+' · balance '+f.balanceSol+' SOL · via '+f.source, 'ok'); }
       const s = body.steps[3];
-      if(s){ const t=addStep(4, s.name, '', 'ok'); const a=el('a',null,'tx '+short(s.signature,16)); a.href=s.explorer; a.target='_blank'; t.querySelector('span').appendChild(a); }
+      if(s){
+        const t = addStep(4, s.name, s.signature ? '' : (s.note || 'waiting for cluster confirmation'), 'ok');
+        if(s.signature && s.explorer){
+          const a = el('a',null,'tx '+short(s.signature,16)); a.href=s.explorer; a.target='_blank';
+          t.querySelector('span').appendChild(a);
+        }
+      }
       const p = body.steps[4];
       if(p){ const t=addStep(5, p.name+' → HTTP '+p.status, '', p.status===200?'ok':'bad');
-        const pre=el('pre',null,JSON.stringify(p.payload,null,2)); t.appendChild(pre);
-        const a=el('a',null,'settlement tx on explorer'); a.href=p.explorer; a.target='_blank'; a.style.display='block'; a.style.marginTop='6px'; t.appendChild(a); }
+        if(p.payload){ const pre=el('pre',null,JSON.stringify(p.payload,null,2)); t.appendChild(pre); }
+        if(p.explorer){ const a=el('a',null,'settlement tx on explorer'); a.href=p.explorer; a.target='_blank'; a.style.display='block'; a.style.marginTop='6px'; t.appendChild(a); } }
       addStep(6, body.ok ? 'Metered call delivered ✓' : 'Self-test reported a problem',
               'completed in '+(body.elapsedMs||0)+' ms'+(body.error?(' · '+body.error):''), body.ok?'ok':'bad');
     }
